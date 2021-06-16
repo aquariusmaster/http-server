@@ -1,41 +1,43 @@
 package com.anderb.webserver.server;
 
-import lombok.extern.log4j.Log4j;
+import com.anderb.webserver.server.request.HttpRequest;
+import com.anderb.webserver.server.request.HttpRequestParser;
+import com.anderb.webserver.server.response.HttpResponse;
+import com.anderb.webserver.server.response.HttpResponseWriter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Properties;
 
-@Log4j
+@Slf4j
 public class HttpServer {
-    private final static int PORT = 8080;
-    private final static int MAX_CONN = 256;
-    private static HttpRequestParser requestParser = new HttpRequestParser();
+    private final HttpRequestParser requestParser;
+    private final HttpResponseWriter responseWriter;
+    private int port = 8080;
+
     private static volatile boolean finished = false;
 
-    public static void main(String[] args) {
-        try (ServerSocket server = new ServerSocket(PORT, MAX_CONN)){
+    public HttpServer(HttpRequestParser requestParser, HttpResponseWriter responseWriter, Properties properties) {
+        this.requestParser = requestParser;
+        this.responseWriter = responseWriter;
+        if (properties != null) {
+            port = properties.get("port") != null ? (int) properties.get("port") : 8080;
+        }
+    }
+
+    public void run() {
+        try (ServerSocket server = new ServerSocket(port)){
             log.info("Server is running");
             while (!finished) {
                 try (Socket socket = server.accept()) {
                     HttpRequest httpRequest = requestParser.parseRequest(socket);
-                    log.info("Request: " + httpRequest);
-                    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-
-                    out.write("HTTP/1.0 200 OK\r\n");
-                    out.write("Date: Fri, 31 Dec 1999 23:59:59 GMT\r\n");
-                    out.write("Server: Apache/0.8.4\r\n");
-                    out.write("Content-Type: text/html\r\n");
-                    out.write("Content-Length: 6\r\n");
-                    out.write("Expires: Sat, 01 Jan 2000 00:59:59 GMT\r\n");
-                    out.write("Last-modified: Fri, 09 Aug 1996 14:21:40 GMT\r\n");
-                    out.write("\r\n");
-                    out.write("Hello!");
-
-                    out.flush();
-                    out.close();
+                    log.debug("Request: {}", httpRequest);
+                    HttpResponse response = HttpResponse.builder().status(HttpStatus.OK).body("Success").build();
+                    responseWriter.writeResponse(socket, response);
                 } catch (Exception e) {
                     log.error("Error during working with socket", e);
                 }

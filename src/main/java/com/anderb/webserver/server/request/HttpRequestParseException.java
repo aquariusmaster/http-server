@@ -1,4 +1,4 @@
-package com.anderb.webserver.server;
+package com.anderb.webserver.server.request;
 
 public class HttpRequestParseException extends RuntimeException {
 

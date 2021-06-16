@@ -1,4 +1,4 @@
-package com.anderb.webserver.server;
+package com.anderb.webserver.server.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,12 +7,12 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequestParser {
+public class BasicHttpRequestParser implements HttpRequestParser {
     private static final String SPACE = " ";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
     private static final String HEADER_DELIMITER = ": ";
 
-    public HttpRequest parseRequest(Socket socket) throws HttpRequestParseException {
+    public HttpRequest parseRequest(Socket socket) {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             HttpRequest httpRequest = new HttpRequest();
