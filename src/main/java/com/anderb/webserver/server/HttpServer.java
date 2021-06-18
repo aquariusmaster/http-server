@@ -36,7 +36,13 @@ public class HttpServer {
                 try (Socket socket = server.accept()) {
                     HttpRequest httpRequest = requestParser.parseRequest(socket);
                     log.debug("Request: {}", httpRequest);
-                    HttpResponse response = HttpResponse.builder().status(HttpStatus.OK).body("Success").build();
+
+                    HttpResponse response = new HttpResponse();
+                    response.setStatus(HttpStatus.OK);
+                    response.getWriter().write(httpRequest.getRequestBody());
+                    response.getWriter().flush();
+                    response.getWriter().close();
+
                     responseWriter.writeResponse(socket, response);
                 } catch (Exception e) {
                     log.error("Error during working with socket", e);
