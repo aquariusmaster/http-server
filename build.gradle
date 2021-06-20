@@ -20,6 +20,15 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'com.anderb.webserver.HttpServerApplication'
+        )
+    }
+}
+
 test {
     useJUnitPlatform()
 }
