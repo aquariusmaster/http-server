@@ -1,6 +1,6 @@
 package com.anderb.webserver.server.handler;
 
-public class HttpHandleException extends Exception {
+public class HttpHandleException extends RuntimeException {
     public HttpHandleException(String message) {
         super(message);
     }

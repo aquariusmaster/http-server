@@ -1,26 +1,26 @@
 package com.anderb.webserver.server;
 
+import com.anderb.webserver.server.handler.EmptyRequestHandler;
+import com.anderb.webserver.server.handler.Endpoint;
 import com.anderb.webserver.server.handler.HttpHandler;
 import com.anderb.webserver.server.handler.NotFoundHttpHandler;
-import com.anderb.webserver.server.request.BasicHttpRequestParser;
+import com.anderb.webserver.server.request.BaseHttpRequestParser;
 import com.anderb.webserver.server.request.HttpRequest;
 import com.anderb.webserver.server.request.HttpRequestParseException;
 import com.anderb.webserver.server.request.HttpRequestParser;
-import com.anderb.webserver.server.response.BasicHttpResponseWriter;
+import com.anderb.webserver.server.response.BaseHttpResponseWriter;
 import com.anderb.webserver.server.response.HttpResponse;
 import com.anderb.webserver.server.response.HttpResponseWriteException;
 import com.anderb.webserver.server.response.HttpResponseWriter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class HttpServer {
@@ -37,13 +37,12 @@ public class HttpServer {
         this.httpHandler = httpHandler;
         this.responseWriter = responseWriter;
         if (properties != null) {
-            port = properties.get("port") != null ? (int) properties.get("port") : 8080;
+            port = (int) properties.getOrDefault("port", 8080);
         }
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
     public void run() {
-
         try {
             server = new ServerSocket(port);
             log.info("Server is running");
@@ -52,22 +51,9 @@ public class HttpServer {
                 try {
                     socket = server.accept();
                     //Parsing
-//                    log.info("@@@@@@@@@@@@@@@@");
-//                    log.info("Socket: {}", socket);
-//                    log.info("Inet: {}", socket.getInetAddress());
-//                    log.info("Port: {}", socket.getPort());
-//                    log.info("Buff size: {}", socket.getReceiveBufferSize());
-//                    log.info("Opts: {}", socket.supportedOptions());
-//                    log.info("Timeout: {}", socket.getSoTimeout());
-//                    log.info("Remote: {}", socket.getRemoteSocketAddress());
-//                    log.info("getTcpNoDelay: {}", socket.getTcpNoDelay());
-//                    log.info("isConnected: {}", socket.isConnected());
-//                    log.info("getLocalSocketAddress: {}", socket.getLocalSocketAddress());
-//                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//                    log.info("Content: {}", bufferedReader.lines().collect(Collectors.toList()));
-//                    log.info("@@@@@@@@@@@@@@@@");
                     HttpRequest request = requestParser.parseRequest(socket);
                     log.debug("Request: {}", request);
+
                     //Processing
                     HttpResponse response = new HttpResponse();
                     httpHandler.handle(request, response);
@@ -76,12 +62,10 @@ public class HttpServer {
                     responseWriter.writeResponse(socket, response);
                 } catch (HttpRequestParseException e) {
                     log.error("Error parsing request", e);
-                    HttpResponse response = new HttpResponse();
-                    response.setStatus(HttpStatus.BAD_REQUEST);
-                    response.getWriter().println(e.getMessage());
-                    responseWriter.writeResponse(socket, response);
+                    responseWriter.writeResponse(socket, HttpResponse.badRequest(e.getMessage()));
                 } catch (HttpResponseWriteException e) {
                     log.error("Error writing response", e);
+                    responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
                 } catch (Exception e) {
                     if (!finished) { //suppress exception during finishing
                         log.error("Error during working with socket", e);
@@ -90,7 +74,6 @@ public class HttpServer {
                     closeSilently(socket);
                 }
             }
-
         } catch (IOException e) {
             log.error("Server error", e);
         } finally {
@@ -115,13 +98,14 @@ public class HttpServer {
         }
     }
 
-    public static HttpServerBuilder create() {
+    public static HttpServerBuilder createDefault() {
         return new HttpServerBuilder();
     }
 
     public static class HttpServerBuilder {
         private HttpRequestParser parser;
-        private HttpHandler handler;
+        private LinkedList<HttpHandler> handlers = new LinkedList<>();
+        private LinkedList<Endpoint> endpoints = new LinkedList<>();
         private HttpResponseWriter writer;
 
         HttpServerBuilder() {
@@ -133,14 +117,21 @@ public class HttpServer {
         }
 
         public HttpServerBuilder handler(HttpHandler httpHandler) {
-            if (handler == null) {
-                handler = httpHandler;
-                return this;
+            if (handlers == null) {
+                handlers = new LinkedList<>();
             }
-            this.handler.nextHandler(httpHandler);
-            handler = httpHandler;
+            handlers.add(httpHandler);
             return this;
         }
+
+        public HttpServerBuilder endpoint(Endpoint endpoint) {
+            if (endpoints == null) {
+                endpoints = new LinkedList<>();
+            }
+            endpoints.add(endpoint);
+            return this;
+        }
+
 
         public HttpServerBuilder responseWriter(HttpResponseWriter responseWriter) {
             this.writer = responseWriter;
@@ -149,18 +140,16 @@ public class HttpServer {
 
         public HttpServer build() {
             if (parser == null) {
-                parser = new BasicHttpRequestParser();
+                parser = new BaseHttpRequestParser();
             }
             if (writer == null) {
-                writer = new BasicHttpResponseWriter();
+                writer = new BaseHttpResponseWriter();
             }
-            if (handler != null) {
-                handler.nextHandler(new NotFoundHttpHandler());
-            } else {
-                handler = new NotFoundHttpHandler();
-            }
+            handlers.addAll(endpoints);
+            handlers.addFirst(new EmptyRequestHandler());
+            handlers.addLast(new NotFoundHttpHandler());
 
-            return new HttpServer(parser, handler, writer, null);
+            return new HttpServer(parser, HttpHandler.of(handlers), writer, null);
         }
 
     }

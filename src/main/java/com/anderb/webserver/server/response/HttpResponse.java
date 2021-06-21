@@ -1,6 +1,7 @@
 package com.anderb.webserver.server.response;
 
 import com.anderb.webserver.server.HttpStatus;
+import lombok.SneakyThrows;
 
 import java.io.*;
 import java.util.HashMap;
@@ -49,7 +50,8 @@ public class HttpResponse {
         return outputStream;
     }
 
-    public PrintWriter getWriter() throws UnsupportedEncodingException {
+    @SneakyThrows
+    public PrintWriter getWriter() {
         if (usingOutputStream) {
             throw new IllegalStateException("Illegal to call getWriter() after getOutputStream() has been called");
         }
@@ -60,6 +62,11 @@ public class HttpResponse {
         }
 
         return writer;
+    }
+
+    public void writeAsString(String value) {
+        if (value == null) return;
+        getWriter().println(value);
     }
 
     private String getCharacterEncoding() {
@@ -76,5 +83,23 @@ public class HttpResponse {
 
     protected byte[] getBodyInBytes() {
         return ((ByteArrayOutputStream) outputStream).toByteArray();
+    }
+
+    public boolean isUsingOutputStream() {
+        return usingOutputStream;
+    }
+
+    public static HttpResponse badRequest(String message) {
+        HttpResponse response = new HttpResponse();
+        response.setStatus(HttpStatus.BAD_REQUEST);
+        response.getWriter().println(message);
+        return response;
+    }
+
+    public static HttpResponse serverError(String message) {
+        HttpResponse response = new HttpResponse();
+        response.setStatus(HttpStatus.SERVER_ERROR);
+        response.getWriter().println(message);
+        return response;
     }
 }

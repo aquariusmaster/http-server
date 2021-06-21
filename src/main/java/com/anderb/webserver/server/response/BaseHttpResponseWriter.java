@@ -10,7 +10,7 @@ import java.util.Objects;
 
 import static com.anderb.webserver.server.Headers.*;
 
-public class BasicHttpResponseWriter implements HttpResponseWriter {
+public class BaseHttpResponseWriter implements HttpResponseWriter {
     private static final String SERVER_VERSION = "HttpServer/0.0.1";
     private static final String DEFAULT_MIME_TYPE = "text/html";
     private static final String DELIM = ": ";
@@ -38,7 +38,7 @@ public class BasicHttpResponseWriter implements HttpResponseWriter {
     }
 
     private void writeStatus(HttpStatus status, BufferedWriter out) throws IOException {
-        out.write("HTTP/1.0 " + status.getCode() + " " + status.getMsg() + "\r\n");
+        out.write("HTTP/1.0 " + status.getCode() + " " + status.getMessage() + "\r\n");
     }
 
     private void writeHeaders(HttpResponse response, BufferedWriter out) throws IOException {
