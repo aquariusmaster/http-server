@@ -5,11 +5,12 @@ import com.anderb.webserver.server.HttpStatus;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.anderb.webserver.server.Headers.CONTENT_TYPE;
 
 public class HttpResponse {
-    private HttpStatus status;
+    private HttpStatus status = HttpStatus.OK;
     private final Map<String, String> headers = new HashMap<>();
     private final OutputStream outputStream = new ByteArrayOutputStream();
     private PrintWriter writer;
@@ -30,6 +31,10 @@ public class HttpResponse {
 
     public String getHeader(String name) {
         return headers.get(name);
+    }
+
+    public Set<String> getHeaders() {
+        return headers.keySet();
     }
 
     public void setContentType(String type) {

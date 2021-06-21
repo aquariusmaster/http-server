@@ -1,6 +1,7 @@
 package com.anderb.webserver.server.response;
 
 import com.anderb.webserver.server.HttpStatus;
+import lombok.SneakyThrows;
 
 import java.io.*;
 import java.net.Socket;
@@ -20,6 +21,7 @@ public class BasicHttpResponseWriter implements HttpResponseWriter {
 
         try (OutputStream outputStream = socket.getOutputStream();
              BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+
             writeStatus(response.getStatus(), out);
             writeHeaders(response, out);
             writeBody(response, outputStream);
@@ -40,11 +42,19 @@ public class BasicHttpResponseWriter implements HttpResponseWriter {
     }
 
     private void writeHeaders(HttpResponse response, BufferedWriter out) throws IOException {
-        out.write(DATE + DELIM + new Date() + "\r\n");
-        out.write("Server: " + SERVER_VERSION + "\r\n");
-        out.write(CONTENT_TYPE + DELIM + DEFAULT_MIME_TYPE + "\r\n");
-        out.write(String.format(CONTENT_LENGTH + DELIM + "%d\r\n", response.getContentLength()));
+        writeHeader(DATE, new Date(), out);
+        writeHeader("Server", SERVER_VERSION, out);
+        writeHeader(CONTENT_LENGTH, response.getContentLength(), out);
+        response.getHeaders().forEach(name -> writeHeader(name, response.getHeader(name), out));
+        if (!response.getHeaders().contains(CONTENT_TYPE)) {
+            writeHeader(CONTENT_TYPE,  DEFAULT_MIME_TYPE, out);
+        }
         out.write("\r\n");
         out.flush();
+    }
+
+    @SneakyThrows
+    private void writeHeader(String name, Object value, BufferedWriter out) {
+        out.write(name + DELIM + value + "\r\n");
     }
 }
