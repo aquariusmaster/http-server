@@ -1,4 +1,4 @@
-package com.anderb.webserver.server.request;
+package com.anderb.httpserver.server.request;
 
 import lombok.Data;
 

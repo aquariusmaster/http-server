@@ -1,4 +1,4 @@
-package com.anderb.webserver.server;
+package com.anderb.httpserver.server;
 
 public enum HttpStatus {
 

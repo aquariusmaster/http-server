@@ -1,7 +1,7 @@
-package com.anderb.webserver.server.handler;
+package com.anderb.httpserver.server.handler;
 
-import com.anderb.webserver.server.request.HttpRequest;
-import com.anderb.webserver.server.response.HttpResponse;
+import com.anderb.httpserver.server.request.HttpRequest;
+import com.anderb.httpserver.server.response.HttpResponse;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,6 +17,7 @@ public abstract class HttpHandler {
 
     public static HttpHandler of(HttpHandler ...handlers) {
         Objects.requireNonNull(handlers);
+
         HttpHandler head = null;
         HttpHandler prev = null;
         for (HttpHandler handler : handlers) {
@@ -32,6 +33,7 @@ public abstract class HttpHandler {
 
     public static HttpHandler of(List<HttpHandler> handlers) {
         Objects.requireNonNull(handlers);
+
         HttpHandler prev = null;
         for (HttpHandler handler : handlers) {
             if (prev == null) {

@@ -1,21 +1,17 @@
-package com.anderb.webserver.server;
+package com.anderb.httpserver.server;
 
-import com.anderb.webserver.server.handler.EmptyRequestHandler;
-import com.anderb.webserver.server.handler.Endpoint;
-import com.anderb.webserver.server.handler.HttpHandler;
-import com.anderb.webserver.server.handler.NotFoundHttpHandler;
-import com.anderb.webserver.server.request.BaseHttpRequestParser;
-import com.anderb.webserver.server.request.HttpRequest;
-import com.anderb.webserver.server.request.HttpRequestParseException;
-import com.anderb.webserver.server.request.HttpRequestParser;
-import com.anderb.webserver.server.response.BaseHttpResponseWriter;
-import com.anderb.webserver.server.response.HttpResponse;
-import com.anderb.webserver.server.response.HttpResponseWriteException;
-import com.anderb.webserver.server.response.HttpResponseWriter;
+import com.anderb.httpserver.server.handler.*;
+import com.anderb.httpserver.server.request.BaseHttpRequestParser;
+import com.anderb.httpserver.server.request.HttpRequest;
+import com.anderb.httpserver.server.request.HttpRequestParseException;
+import com.anderb.httpserver.server.request.HttpRequestParser;
+import com.anderb.httpserver.server.response.BaseHttpResponseWriter;
+import com.anderb.httpserver.server.response.HttpResponse;
+import com.anderb.httpserver.server.response.HttpResponseWriteException;
+import com.anderb.httpserver.server.response.HttpResponseWriter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -60,24 +56,28 @@ public class HttpServer {
 
                     //Send response
                     responseWriter.writeResponse(socket, response);
+
                 } catch (HttpRequestParseException e) {
                     log.error("Error parsing request", e);
                     responseWriter.writeResponse(socket, HttpResponse.badRequest(e.getMessage()));
+                } catch (HttpHandleException e) {
+                    log.error("Error handling request", e);
+                    responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
                 } catch (HttpResponseWriteException e) {
                     log.error("Error writing response", e);
                     responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
                 } catch (Exception e) {
-                    if (!finished) { //suppress exception during finishing
+                    if (!finished) { //suppress exception during stopping server
                         log.error("Error during working with socket", e);
                     }
                 } finally {
-                    closeSilently(socket);
+                    IOHelper.closeQuietly(socket);
                 }
             }
         } catch (IOException e) {
             log.error("Server error", e);
         } finally {
-            closeSilently(server);
+            IOHelper.closeQuietly(server);
         }
         log.info("Server was stopped");
     }
@@ -87,15 +87,6 @@ public class HttpServer {
         log.info("Stopping server");
         finished = true;
         server.close();
-    }
-
-    private static void closeSilently(Closeable resourceToClose) {
-        if (resourceToClose == null) return;
-        try {
-            resourceToClose.close();
-        } catch (IOException e) {
-            log.warn("Exception while closing server");
-        }
     }
 
     public static HttpServerBuilder createDefault() {

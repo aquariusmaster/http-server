@@ -1,6 +1,21 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:5.2.0"
+    }
+}
+
 plugins {
     id 'java'
+    id "com.github.johnrengelman.shadow" version "5.2.0"
 }
+
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 group 'com.anderb'
 version '0.0.1-SNAPSHOT'
@@ -24,10 +39,19 @@ jar {
     manifest {
         attributes(
                 'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-                'Main-Class': 'com.anderb.webserver.HttpServerApplication'
+                'Main-Class': 'com.anderb.httpserver.HttpServerApplication'
         )
     }
 }
+
+shadowJar {
+    archiveBaseName.set('http-server')
+    archiveClassifier.set('')
+    archiveVersion.set('')
+}
+
+defaultTasks 'clean', 'build'
+project.tasks.build.dependsOn shadowJar
 
 test {
     useJUnitPlatform()

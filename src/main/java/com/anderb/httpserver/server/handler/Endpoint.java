@@ -1,7 +1,7 @@
-package com.anderb.webserver.server.handler;
+package com.anderb.httpserver.server.handler;
 
-import com.anderb.webserver.server.request.HttpRequest;
-import com.anderb.webserver.server.response.HttpResponse;
+import com.anderb.httpserver.server.request.HttpRequest;
+import com.anderb.httpserver.server.response.HttpResponse;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class Endpoint extends HttpHandler {
 
     @Override
     public void handle(HttpRequest request, HttpResponse response) throws HttpHandleException {
-        if (areMethodAndPathNotFit(request)) {
+        if (!checkMatch(request)) {
             if (nextHandler != null) {
                 nextHandler.handle(request, response);
             }
@@ -36,8 +36,9 @@ public class Endpoint extends HttpHandler {
         }
     }
 
-    private boolean areMethodAndPathNotFit(HttpRequest request) {
-        return !(method.equalsIgnoreCase(request.getMethod()) && path.equalsIgnoreCase(request.getPath()));
+    private boolean checkMatch(HttpRequest request) {
+        return method.equalsIgnoreCase(request.getMethod())
+                && path.equalsIgnoreCase(request.getPath());
     }
 
     private void flushAndCloseInputStream(HttpResponse response) {

@@ -1,4 +1,4 @@
-package com.anderb.webserver.server.request;
+package com.anderb.httpserver.server.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.anderb.webserver.server.Headers.*;
+import static com.anderb.httpserver.server.Headers.*;
 
 public class BaseHttpRequestParser implements HttpRequestParser {
 

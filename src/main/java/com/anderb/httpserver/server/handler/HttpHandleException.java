@@ -1,4 +1,4 @@
-package com.anderb.webserver.server.handler;
+package com.anderb.httpserver.server.handler;
 
 public class HttpHandleException extends RuntimeException {
     public HttpHandleException(String message) {

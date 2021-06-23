@@ -1,6 +1,6 @@
-package com.anderb.webserver.server.response;
+package com.anderb.httpserver.server.response;
 
-import com.anderb.webserver.server.HttpStatus;
+import com.anderb.httpserver.server.HttpStatus;
 import lombok.SneakyThrows;
 
 import java.io.*;
@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.Date;
 import java.util.Objects;
 
-import static com.anderb.webserver.server.Headers.*;
+import static com.anderb.httpserver.server.Headers.*;
 
 public class BaseHttpResponseWriter implements HttpResponseWriter {
     private static final String SERVER_VERSION = "HttpServer/0.0.1";

@@ -1,8 +1,8 @@
-package com.anderb.webserver.server.handler;
+package com.anderb.httpserver.server.handler;
 
-import com.anderb.webserver.server.HttpStatus;
-import com.anderb.webserver.server.request.HttpRequest;
-import com.anderb.webserver.server.response.HttpResponse;
+import com.anderb.httpserver.server.HttpStatus;
+import com.anderb.httpserver.server.request.HttpRequest;
+import com.anderb.httpserver.server.response.HttpResponse;
 
 public class NotFoundHttpHandler extends HttpHandler {
     @Override

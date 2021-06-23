@@ -1,20 +1,20 @@
-package com.anderb.webserver.server;
+package com.anderb.httpserver.server;
 
 import lombok.SneakyThrows;
 
-import java.io.Closeable;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Objects;
 
 public class IOHelper {
 
+    private final static String STATIC_PATH = "static/";
+
     @SneakyThrows
-    public static void writeResourceToStream(String resourcePath, OutputStream out) {
+    public static void writeStaticFileToStream(String resourcePath, OutputStream out) {
         Objects.requireNonNull(resourcePath);
         Objects.requireNonNull(out);
-        try (FileInputStream fis = new FileInputStream(resourcePath)) {
+
+        try (InputStream fis = IOHelper.class.getClassLoader().getResourceAsStream(STATIC_PATH + resourcePath)) {
             int n;
             byte[] buffer = new byte[8192];
             while ((n = fis.read(buffer)) != -1) {

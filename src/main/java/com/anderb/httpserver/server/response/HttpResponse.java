@@ -1,6 +1,6 @@
-package com.anderb.webserver.server.response;
+package com.anderb.httpserver.server.response;
 
-import com.anderb.webserver.server.HttpStatus;
+import com.anderb.httpserver.server.HttpStatus;
 import lombok.SneakyThrows;
 
 import java.io.*;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.anderb.webserver.server.Headers.CONTENT_TYPE;
+import static com.anderb.httpserver.server.Headers.CONTENT_TYPE;
 
 public class HttpResponse {
     private HttpStatus status = HttpStatus.OK;
