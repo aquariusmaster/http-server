@@ -55,4 +55,11 @@ public class Endpoint extends HttpHandler {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Endpoint {" +
+                "path='" + path + '\'' +
+                ", method=" + method +
+                '}';
+    }
 }

@@ -7,14 +7,12 @@ import java.util.Objects;
 
 public class IOHelper {
 
-    private final static String STATIC_PATH = "static/";
-
     @SneakyThrows
-    public static void writeStaticFileToStream(String resourcePath, OutputStream out) {
+    public static void writeFileFromStatic(String resourcePath, OutputStream out) {
         Objects.requireNonNull(resourcePath);
         Objects.requireNonNull(out);
 
-        try (InputStream fis = IOHelper.class.getClassLoader().getResourceAsStream(STATIC_PATH + resourcePath)) {
+        try (InputStream fis = IOHelper.class.getClassLoader().getResourceAsStream(resourcePath)) {
             int n;
             byte[] buffer = new byte[8192];
             while ((n = fis.read(buffer)) != -1) {

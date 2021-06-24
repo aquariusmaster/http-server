@@ -140,6 +140,8 @@ public class HttpServer {
             handlers.addFirst(new EmptyRequestHandler());
             handlers.addLast(new NotFoundHttpHandler());
 
+            endpoints.forEach(endpoint -> log.info("Registering {}", endpoint));
+
             return new HttpServer(parser, HttpHandler.of(handlers), writer, null);
         }
 
