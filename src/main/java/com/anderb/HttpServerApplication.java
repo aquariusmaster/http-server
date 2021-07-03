@@ -1,13 +1,15 @@
-package com.anderb.httpserver;
+package com.anderb;
 
-import com.anderb.httpserver.server.HttpServer;
-import com.anderb.httpserver.server.handler.Endpoint;
 
-import static com.anderb.httpserver.server.IOHelper.writeFileFromStatic;
+import com.anderb.server.http.HttpServer;
+import com.anderb.server.http.handler.Endpoint;
+
+import static com.anderb.server.IOHelper.writeFileFromResource;
 
 public class HttpServerApplication {
     public static void main(String[] args) {
-        HttpServer.createDefault()
+        HttpServer.create()
+                .port(8080)
                 .endpoint(Endpoint
                         .create()
                         .method("GET")
@@ -25,7 +27,7 @@ public class HttpServerApplication {
                         .method("GET")
                         .path("/favicon.ico")
                         .handler((request, response) -> {
-                            writeFileFromStatic("static/favicon.ico", response.getOutputStream());
+                            writeFileFromResource("static/favicon.ico", response.getOutputStream());
                             response.addHeader("Content-Type", "image/x-icon");
                             response.addHeader("Content-Disposition", "attachment; filename=favicon.ico");
                         })
@@ -35,7 +37,7 @@ public class HttpServerApplication {
                         .method("GET")
                         .path("/")
                         .handler((request, response) -> {
-                            writeFileFromStatic("static/index.html", response.getOutputStream());
+                            writeFileFromResource("static/index.html", response.getOutputStream());
                             response.addHeader("Content-Type", "text/html;charset=utf-8");
                             response.addHeader("encoding", "utf-8");
                         })

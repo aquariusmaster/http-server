@@ -1,4 +1,4 @@
-package com.anderb.httpserver.server.response;
+package com.anderb.server.http.response;
 
 public class HttpResponseWriteException extends RuntimeException {
 

@@ -1,14 +1,13 @@
-package com.anderb.httpserver.server.response;
+package com.anderb.server.http.response;
 
-import com.anderb.httpserver.server.HttpStatus;
+import com.anderb.server.http.Headers;
+import com.anderb.server.http.HttpStatus;
 import lombok.SneakyThrows;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.Date;
 import java.util.Objects;
-
-import static com.anderb.httpserver.server.Headers.*;
 
 public class BaseHttpResponseWriter implements HttpResponseWriter {
     private static final String SERVER_VERSION = "HttpServer/0.0.1";
@@ -42,12 +41,12 @@ public class BaseHttpResponseWriter implements HttpResponseWriter {
     }
 
     private void writeHeaders(HttpResponse response, BufferedWriter out) throws IOException {
-        writeHeader(DATE, new Date(), out);
+        writeHeader(Headers.DATE, new Date(), out);
         writeHeader("Server", SERVER_VERSION, out);
-        writeHeader(CONTENT_LENGTH, response.getContentLength(), out);
+        writeHeader(Headers.CONTENT_LENGTH, response.getContentLength(), out);
         response.getHeaders().forEach(name -> writeHeader(name, response.getHeader(name), out));
-        if (!response.getHeaders().contains(CONTENT_TYPE)) {
-            writeHeader(CONTENT_TYPE,  DEFAULT_MIME_TYPE, out);
+        if (!response.getHeaders().contains(Headers.CONTENT_TYPE)) {
+            writeHeader(Headers.CONTENT_TYPE,  DEFAULT_MIME_TYPE, out);
         }
         out.write("\r\n");
         out.flush();

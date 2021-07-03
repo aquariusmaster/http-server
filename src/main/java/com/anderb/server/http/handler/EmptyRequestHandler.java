@@ -1,8 +1,8 @@
-package com.anderb.httpserver.server.handler;
+package com.anderb.server.http.handler;
 
-import com.anderb.httpserver.server.HttpStatus;
-import com.anderb.httpserver.server.request.HttpRequest;
-import com.anderb.httpserver.server.response.HttpResponse;
+import com.anderb.server.http.HttpStatus;
+import com.anderb.server.http.response.HttpResponse;
+import com.anderb.server.http.request.HttpRequest;
 
 public class EmptyRequestHandler  extends HttpHandler {
     @Override

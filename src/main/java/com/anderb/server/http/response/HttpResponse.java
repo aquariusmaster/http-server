@@ -1,14 +1,13 @@
-package com.anderb.httpserver.server.response;
+package com.anderb.server.http.response;
 
-import com.anderb.httpserver.server.HttpStatus;
+import com.anderb.server.http.Headers;
+import com.anderb.server.http.HttpStatus;
 import lombok.SneakyThrows;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import static com.anderb.httpserver.server.Headers.CONTENT_TYPE;
 
 public class HttpResponse {
     private HttpStatus status = HttpStatus.OK;
@@ -39,7 +38,7 @@ public class HttpResponse {
     }
 
     public void setContentType(String type) {
-        headers.put(CONTENT_TYPE, type);
+        headers.put(Headers.CONTENT_TYPE, type);
     }
 
     public OutputStream getOutputStream() {

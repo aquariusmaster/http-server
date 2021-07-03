@@ -1,4 +1,4 @@
-package com.anderb.httpserver.server;
+package com.anderb.server;
 
 import lombok.SneakyThrows;
 
@@ -8,7 +8,7 @@ import java.util.Objects;
 public class IOHelper {
 
     @SneakyThrows
-    public static void writeFileFromStatic(String resourcePath, OutputStream out) {
+    public static void writeFileFromResource(String resourcePath, OutputStream out) {
         Objects.requireNonNull(resourcePath);
         Objects.requireNonNull(out);
 

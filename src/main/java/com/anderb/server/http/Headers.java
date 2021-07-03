@@ -1,4 +1,4 @@
-package com.anderb.httpserver.server;
+package com.anderb.server.http;
 
 public class Headers {
     public final static String DATE = "Date";

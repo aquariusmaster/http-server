@@ -1,7 +1,7 @@
-package com.anderb.httpserver.server.handler;
+package com.anderb.server.http.handler;
 
-import com.anderb.httpserver.server.request.HttpRequest;
-import com.anderb.httpserver.server.response.HttpResponse;
+import com.anderb.server.http.request.HttpRequest;
+import com.anderb.server.http.response.HttpResponse;
 
 import java.util.List;
 import java.util.Objects;
