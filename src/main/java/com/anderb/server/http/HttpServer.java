@@ -1,6 +1,5 @@
 package com.anderb.server.http;
 
-import com.anderb.server.IOHelper;
 import com.anderb.server.SocketTemplate;
 import com.anderb.server.http.handler.*;
 import com.anderb.server.http.request.BaseHttpRequestParser;
@@ -33,7 +32,6 @@ public class HttpServer {
         this.responseWriter = responseWriter;
 
         socketTemplate = buildServer(port);
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
     private SocketTemplate buildServer(int port) {
@@ -48,13 +46,6 @@ public class HttpServer {
                         //Processing
                         HttpResponse response = new HttpResponse();
                         httpHandler.handle(request, response);
-
-                        try {
-                            Thread.sleep(10000);
-                            log.info("FINISHED!!!");
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
 
                         //Send response
                         responseWriter.writeResponse(socket, response);
@@ -72,7 +63,7 @@ public class HttpServer {
                 })
                 .errorHandler((e, socket) ->
                         responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage())))
-                .pool(Executors.newFixedThreadPool(1))
+                .pool(Executors.newFixedThreadPool(50))
                 .build();
     }
 
@@ -81,7 +72,6 @@ public class HttpServer {
     }
 
     public void stop() {
-        log.info("@@@@@@@@@");
         socketTemplate.stop();
     }
 

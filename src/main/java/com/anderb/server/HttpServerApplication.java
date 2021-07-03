@@ -1,4 +1,4 @@
-package com.anderb;
+package com.anderb.server;
 
 
 import com.anderb.server.http.HttpServer;

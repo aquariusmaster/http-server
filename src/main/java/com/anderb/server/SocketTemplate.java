@@ -52,7 +52,9 @@ public class SocketTemplate {
                         }
                     });
                 } catch (Exception e) {
-                    log.error("Error during working with socket", e);
+                    if (!server.isClosed()) {
+                        log.error("Error during working with socket", e);
+                    }
                 }
             }
         } catch (IOException e) {
