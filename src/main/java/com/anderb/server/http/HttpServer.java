@@ -61,8 +61,12 @@ public class HttpServer {
                         responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
                     }
                 })
-                .errorHandler((e, socket) ->
-                        responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage())))
+                .errorHandler((e, socket) -> {
+                    if (!socket.isClosed()) {
+                        responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
+                    }
+                }
+                )
                 .pool(Executors.newFixedThreadPool(50))
                 .build();
     }
