@@ -8,8 +8,18 @@ import static com.anderb.server.IOHelper.writeFileFromResource;
 
 public class HttpServerApplication {
     public static void main(String[] args) {
+        int port = 8080, threadsNumber = 1;
+        if (args != null) {
+            if (args.length == 1) {
+                port = Integer.parseInt(args[0]);
+            } else if (args.length == 2) {
+                port = Integer.parseInt(args[0]);
+                threadsNumber = Integer.parseInt(args[1]);;
+            }
+        }
         HttpServer.create()
-                .port(8080)
+                .port(port)
+                .threadsNumber(threadsNumber)
                 .endpoint(Endpoint
                         .create()
                         .method("GET")

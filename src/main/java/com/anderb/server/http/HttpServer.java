@@ -25,16 +25,17 @@ public class HttpServer {
     public HttpServer(HttpRequestParser requestParser,
                       HttpHandler httpHandler,
                       HttpResponseWriter responseWriter,
-                      int port) {
+                      int port,
+                      int threadsNumber) {
 
         this.requestParser = requestParser;
         this.httpHandler = httpHandler;
         this.responseWriter = responseWriter;
 
-        socketTemplate = buildServer(port);
+        socketTemplate = buildServer(port, threadsNumber);
     }
 
-    private SocketTemplate buildServer(int port) {
+    private SocketTemplate buildServer(int port, int threadsNumber) {
         return SocketTemplate.builder()
                 .port(port)
                 .requestHandler(socket -> {
@@ -51,13 +52,13 @@ public class HttpServer {
                         responseWriter.writeResponse(socket, response);
 
                     } catch (HttpRequestParseException e) {
-                        log.error("Error parsing request", e);
+                        log.error("Error parsing the request", e);
                         responseWriter.writeResponse(socket, HttpResponse.badRequest(e.getMessage()));
                     } catch (HttpHandleException e) {
-                        log.error("Error handling request", e);
+                        log.error("Error handling the request", e);
                         responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
                     } catch (HttpResponseWriteException e) {
-                        log.error("Error writing response", e);
+                        log.error("Error writing the response", e);
                         responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
                     }
                 })
@@ -67,7 +68,7 @@ public class HttpServer {
                     }
                 }
                 )
-                .pool(Executors.newFixedThreadPool(50))
+                .pool(Executors.newFixedThreadPool(threadsNumber))
                 .build();
     }
 
@@ -88,7 +89,8 @@ public class HttpServer {
         private LinkedList<HttpHandler> handlers = new LinkedList<>();
         private LinkedList<Endpoint> endpoints = new LinkedList<>();
         private HttpResponseWriter writer;
-        private int port;
+        private Integer port;
+        private Integer threadsNumber;
 
         HttpServerBuilder() {
         }
@@ -124,6 +126,11 @@ public class HttpServer {
             return this;
         }
 
+        public HttpServerBuilder threadsNumber(int threadsNumber) {
+            this.threadsNumber = threadsNumber;
+            return this;
+        }
+
         public HttpServer build() {
             if (parser == null) {
                 parser = new BaseHttpRequestParser();
@@ -136,8 +143,13 @@ public class HttpServer {
             handlers.addLast(new NotFoundHttpHandler());
 
             endpoints.forEach(endpoint -> log.info("Registering {}", endpoint));
-
-            return new HttpServer(parser, HttpHandler.of(handlers), writer, port);
+            if (port == null) {
+                port = 8080;
+            }
+            if (threadsNumber == null) {
+                threadsNumber = 1;
+            }
+            return new HttpServer(parser, HttpHandler.of(handlers), writer, port, threadsNumber);
         }
 
     }

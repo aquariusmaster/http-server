@@ -37,7 +37,7 @@ public class SocketTemplate {
     public void run() {
         try {
             server = new ServerSocket(port);
-            log.info("Server is running");
+            log.info("Server is running on {}", server.getLocalSocketAddress());
             while (!server.isClosed()) {
                 try {
                     Socket socket = server.accept();
