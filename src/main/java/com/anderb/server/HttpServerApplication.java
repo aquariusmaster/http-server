@@ -8,7 +8,7 @@ import static com.anderb.server.IOHelper.writeFileFromResource;
 
 public class HttpServerApplication {
     public static void main(String[] args) {
-        int port = 8080, threadsNumber = 1;
+        int port = 8080, threadsNumber = 2;
         if (args != null) {
             if (args.length == 1) {
                 port = Integer.parseInt(args[0]);

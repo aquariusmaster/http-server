@@ -10,4 +10,8 @@ public class HttpRequest {
     private String path;
     private Map<String, String> headers;
     private String requestBody;
+
+    public String getHeader(String name) {
+        return headers.get(name);
+    }
 }

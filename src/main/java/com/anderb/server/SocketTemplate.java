@@ -42,15 +42,7 @@ public class SocketTemplate {
                 try {
                     Socket socket = server.accept();
                     log.info("Connection established: {}", socket);
-                    pool.execute(() -> {
-                        try {
-                            requestHandler.handle(socket);
-                        } catch (Exception e) {
-                            errorHandler.accept(e, socket);
-                        } finally {
-                            IOHelper.closeQuietly(socket);
-                        }
-                    });
+                    pool.execute(new ConnectionHandler(socket, requestHandler, errorHandler));
                 } catch (Exception e) {
                     if (!server.isClosed()) {
                         log.error("Error during working with socket", e);

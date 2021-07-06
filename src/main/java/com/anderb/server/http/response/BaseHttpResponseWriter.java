@@ -1,14 +1,17 @@
 package com.anderb.server.http.response;
 
+import com.anderb.server.IOHelper;
 import com.anderb.server.http.Headers;
 import com.anderb.server.http.HttpStatus;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.Date;
 import java.util.Objects;
 
+@Slf4j
 public class BaseHttpResponseWriter implements HttpResponseWriter {
     private static final String SERVER_VERSION = "HttpServer/0.0.1";
     private static final String DEFAULT_MIME_TYPE = "text/html";
@@ -18,17 +21,26 @@ public class BaseHttpResponseWriter implements HttpResponseWriter {
         Objects.requireNonNull(socket, "Socket cannot be null!");
         Objects.requireNonNull(response, "response cannot be null!");
 
-        try (OutputStream outputStream = socket.getOutputStream();
-             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+        try {
+            OutputStream outputStream = socket.getOutputStream();
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outputStream));
 
-            writeStatus(response.getStatus(), out);
+            writeStatusLine(response.getStatus(), out);
             writeHeaders(response, out);
             writeBody(response, outputStream);
             out.flush();
             outputStream.flush();
+            log.info("Connection closed: {}", socket.isClosed());
         } catch (Exception e) {
             throw new HttpResponseWriteException(e);
+        } finally {
+            IOHelper.closeQuietly(
+                    response.isUsingOutputStream() ?
+                        response.getOutputStream() :
+                        response.getWriter()
+            );
         }
+        log.info("Connection closed: {}", socket.isClosed());
     }
 
     private void writeBody(HttpResponse response, OutputStream out) throws IOException {
@@ -36,7 +48,7 @@ public class BaseHttpResponseWriter implements HttpResponseWriter {
         out.write(response.getBodyInBytes());
     }
 
-    private void writeStatus(HttpStatus status, BufferedWriter out) throws IOException {
+    private void writeStatusLine(HttpStatus status, BufferedWriter out) throws IOException {
         out.write("HTTP/1.0 " + status.getCode() + " " + status.getMessage() + "\r\n");
     }
 

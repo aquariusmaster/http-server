@@ -15,6 +15,8 @@ public class BaseHttpRequestParser implements HttpRequestParser {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             HttpRequest httpRequest = new HttpRequest();
+//            int first = in.read();
+//            System.out.println("int=" + first + ", char=" + (char) first);
             String firstLine = in.readLine();
             if (firstLine == null) {
                 return null;

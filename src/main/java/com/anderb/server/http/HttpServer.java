@@ -1,5 +1,7 @@
 package com.anderb.server.http;
 
+import com.anderb.server.Handler;
+import com.anderb.server.IOHelper;
 import com.anderb.server.SocketTemplate;
 import com.anderb.server.http.handler.*;
 import com.anderb.server.http.request.BaseHttpRequestParser;
@@ -12,6 +14,7 @@ import com.anderb.server.http.response.HttpResponseWriteException;
 import com.anderb.server.http.response.HttpResponseWriter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.concurrent.Executors;
 
@@ -40,9 +43,14 @@ public class HttpServer {
                 .port(port)
                 .requestHandler(socket -> {
                     try {
+                        socket.setKeepAlive(true);
+
                         //Parsing http request
                         HttpRequest request = requestParser.parseRequest(socket);
                         log.debug("Http request: {}", request);
+                        if (request == null) {
+                            return Handler.Status.IDLE;
+                        }
 
                         //Processing
                         HttpResponse response = new HttpResponse();
@@ -50,6 +58,15 @@ public class HttpServer {
 
                         //Send response
                         responseWriter.writeResponse(socket, response);
+
+                        log.info("Connection: {}", request.getHeader("Connection"));
+                        log.info("Socket keep-alive: {}", socket.getKeepAlive());
+
+                        if (!socket.getKeepAlive() &&
+                                request.getHeader("Connection") == null &&
+                                !"keep-alive".equalsIgnoreCase(request.getHeader("Connection"))) {
+                            IOHelper.closeQuietly(socket);
+                        }
 
                     } catch (HttpRequestParseException e) {
                         log.error("Error parsing the request", e);
@@ -60,7 +77,10 @@ public class HttpServer {
                     } catch (HttpResponseWriteException e) {
                         log.error("Error writing the response", e);
                         responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
+                    } catch (SocketException e) {
+
                     }
+                    return Handler.Status.FINISHED;
                 })
                 .errorHandler((e, socket) -> {
                     if (!socket.isClosed()) {
