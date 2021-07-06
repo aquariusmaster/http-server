@@ -78,7 +78,7 @@ public class HttpServer {
                         log.error("Error writing the response", e);
                         responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
                     } catch (SocketException e) {
-
+                        log.error("Error working with socket", e);
                     }
                     return Handler.Status.FINISHED;
                 })
