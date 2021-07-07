@@ -4,22 +4,16 @@ package com.anderb.server;
 import com.anderb.server.http.HttpServer;
 import com.anderb.server.http.handler.Endpoint;
 
+import java.util.Map;
+
 import static com.anderb.server.IOHelper.writeFileFromResource;
 
 public class HttpServerApplication {
     public static void main(String[] args) {
-        int port = 8080, threadsNumber = 2;
-        if (args != null) {
-            if (args.length == 1) {
-                port = Integer.parseInt(args[0]);
-            } else if (args.length == 2) {
-                port = Integer.parseInt(args[0]);
-                threadsNumber = Integer.parseInt(args[1]);;
-            }
-        }
+        PropertyResolver propertyResolver = new PropertyResolver(args);
         HttpServer.create()
-                .port(port)
-                .threadsNumber(threadsNumber)
+                .port(propertyResolver.getInt("port", 8080))
+                .threadsNumber(propertyResolver.getInt("threadsNumber", 20))
                 .endpoint(Endpoint
                         .create()
                         .method("GET")

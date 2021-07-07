@@ -15,19 +15,28 @@ public class SocketTemplate {
     private final BiConsumer<Exception, Socket> errorHandler;
     private final ExecutorService pool;
     private final int port;
+    private final long idleConnectionTimeout;
 
     private ServerSocket server;
 
     public SocketTemplate(Handler handler,
                           BiConsumer<Exception, Socket> errorHandler,
                           ExecutorService pool,
-                          int port) {
+                          int port,
+                          long idleConnectionTimeout) {
         this.port = port;
         this.requestHandler = handler;
         this.pool = pool;
         this.errorHandler = errorHandler;
+        this.idleConnectionTimeout = idleConnectionTimeout;
         //Stop server gracefully
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+    }
+
+    public SocketTemplate(Handler handler,
+                          BiConsumer<Exception, Socket> errorHandler,
+                          ExecutorService pool) {
+        this(handler, errorHandler, pool, 8080, 5000);
     }
 
     public static SocketTemplateBuilder builder() {
@@ -42,7 +51,7 @@ public class SocketTemplate {
                 try {
                     Socket socket = server.accept();
                     log.info("Connection established: {}", socket);
-                    pool.execute(new ConnectionHandler(socket, requestHandler, errorHandler));
+                    pool.execute(new ConnectionHandler(socket, requestHandler, errorHandler, idleConnectionTimeout));
                 } catch (Exception e) {
                     if (!server.isClosed()) {
                         log.error("Error during working with socket", e);
@@ -70,7 +79,8 @@ public class SocketTemplate {
         private Handler requestHandler;
         private BiConsumer<Exception, Socket> errorHandler;
         private ExecutorService pool;
-        private int port;
+        private Integer port;
+        private Long idleConnectionTimeout;
         private ServerSocket server;
 
         SocketTemplateBuilder() {
@@ -96,13 +106,24 @@ public class SocketTemplate {
             return this;
         }
 
+        public SocketTemplateBuilder idleConnectionTimeout(long idleTtlMillis) {
+            this.idleConnectionTimeout = idleTtlMillis;
+            return this;
+        }
+
         public SocketTemplateBuilder server(ServerSocket server) {
             this.server = server;
             return this;
         }
 
         public SocketTemplate build() {
-            return new SocketTemplate(requestHandler, errorHandler, pool, port);
+            if (port == null) {
+                port = 8080;
+            }
+            if (idleConnectionTimeout == null) {
+                idleConnectionTimeout = 5000L;
+            }
+            return new SocketTemplate(requestHandler, errorHandler, pool, port, idleConnectionTimeout);
         }
 
         public String toString() {

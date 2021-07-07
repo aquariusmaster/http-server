@@ -14,6 +14,7 @@ import com.anderb.server.http.response.HttpResponseWriteException;
 import com.anderb.server.http.response.HttpResponseWriter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.Socket;
 import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.concurrent.Executors;
@@ -35,22 +36,23 @@ public class HttpServer {
         this.httpHandler = httpHandler;
         this.responseWriter = responseWriter;
 
-        socketTemplate = buildServer(port, threadsNumber);
+        socketTemplate = buildHttpServer(port, threadsNumber);
     }
 
-    private SocketTemplate buildServer(int port, int threadsNumber) {
+    private SocketTemplate buildHttpServer(int port, int threadsNumber) {
         return SocketTemplate.builder()
                 .port(port)
+                .idleConnectionTimeout(5000)
                 .requestHandler(socket -> {
                     try {
                         socket.setKeepAlive(true);
 
                         //Parsing http request
                         HttpRequest request = requestParser.parseRequest(socket);
-                        log.debug("Http request: {}", request);
                         if (request == null) {
                             return Handler.Status.IDLE;
                         }
+                        log.info("new {}", request);
 
                         //Processing
                         HttpResponse response = new HttpResponse();
@@ -59,12 +61,7 @@ public class HttpServer {
                         //Send response
                         responseWriter.writeResponse(socket, response);
 
-                        log.info("Connection: {}", request.getHeader("Connection"));
-                        log.info("Socket keep-alive: {}", socket.getKeepAlive());
-
-                        if (!socket.getKeepAlive() &&
-                                request.getHeader("Connection") == null &&
-                                !"keep-alive".equalsIgnoreCase(request.getHeader("Connection"))) {
+                        if (ifNeedToClose(socket, request)) {
                             IOHelper.closeQuietly(socket);
                         }
 
@@ -98,6 +95,12 @@ public class HttpServer {
 
     public void stop() {
         socketTemplate.stop();
+    }
+
+    private boolean ifNeedToClose(Socket socket, HttpRequest request) throws SocketException {
+        return !socket.getKeepAlive() &&
+                request.getHeader("Connection") == null &&
+                !"keep-alive".equalsIgnoreCase(request.getHeader("Connection"));
     }
 
     public static HttpServerBuilder create() {
@@ -159,7 +162,6 @@ public class HttpServer {
                 writer = new BaseHttpResponseWriter();
             }
             handlers.addAll(endpoints);
-            handlers.addFirst(new EmptyRequestHandler());
             handlers.addLast(new NotFoundHttpHandler());
 
             endpoints.forEach(endpoint -> log.info("Registering {}", endpoint));

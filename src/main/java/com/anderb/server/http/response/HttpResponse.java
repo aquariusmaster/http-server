@@ -1,6 +1,6 @@
 package com.anderb.server.http.response;
 
-import com.anderb.server.http.Headers;
+import com.anderb.server.http.Constants;
 import com.anderb.server.http.HttpStatus;
 import lombok.SneakyThrows;
 
@@ -38,7 +38,7 @@ public class HttpResponse {
     }
 
     public void setContentType(String type) {
-        headers.put(Headers.CONTENT_TYPE, type);
+        headers.put(Constants.CONTENT_TYPE, type);
     }
 
     public OutputStream getOutputStream() {

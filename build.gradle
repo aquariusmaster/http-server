@@ -57,7 +57,6 @@ test {
     useJUnitPlatform()
 }
 
-task serve(type: Exec) {
+task serve(type: Exec, dependsOn: build) {
     commandLine 'java', '-jar', 'build/libs/http-server.jar'
 }
-serve.mustRunAfter build

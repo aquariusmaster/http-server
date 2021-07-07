@@ -14,4 +14,12 @@ public class HttpRequest {
     public String getHeader(String name) {
         return headers.get(name);
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "method='" + method + '\'' +
+                ", path='" + path + '\'' +
+                '}';
+    }
 }
