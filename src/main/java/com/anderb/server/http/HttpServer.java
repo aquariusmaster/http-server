@@ -17,7 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.LinkedList;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class HttpServer {
@@ -29,20 +33,19 @@ public class HttpServer {
     public HttpServer(HttpRequestParser requestParser,
                       HttpHandler httpHandler,
                       HttpResponseWriter responseWriter,
-                      int port,
-                      int threadsNumber) {
+                      int port, int threadsNumber, long keepAliveTime) {
 
         this.requestParser = requestParser;
         this.httpHandler = httpHandler;
         this.responseWriter = responseWriter;
 
-        socketTemplate = buildHttpServer(port, threadsNumber);
+        socketTemplate = buildHttpServer(port, threadsNumber, keepAliveTime);
     }
 
-    private SocketTemplate buildHttpServer(int port, int threadsNumber) {
+    private SocketTemplate buildHttpServer(int port, int threadsNumber, long keepAliveTime) {
         return SocketTemplate.builder()
                 .port(port)
-                .idleConnectionTimeout(5000)
+                .keepAliveTime(keepAliveTime)
                 .requestHandler(socket -> {
                     try {
                         socket.setKeepAlive(true);
@@ -85,8 +88,12 @@ public class HttpServer {
                     }
                 }
                 )
-                .pool(Executors.newFixedThreadPool(threadsNumber))
+                .pool(createPool(threadsNumber, port))
                 .build();
+    }
+
+    private ExecutorService createPool(int threadsNumber, int port) {
+        return Executors.newFixedThreadPool(threadsNumber, new DefaultThreadFactory(port));
     }
 
     public void run() {
@@ -114,6 +121,7 @@ public class HttpServer {
         private HttpResponseWriter writer;
         private Integer port;
         private Integer threadsNumber;
+        private Long keepAliveTime;
 
         HttpServerBuilder() {
         }
@@ -154,6 +162,11 @@ public class HttpServer {
             return this;
         }
 
+        public HttpServerBuilder keepAliveTime(long keepAliveTime) {
+            this.keepAliveTime = keepAliveTime;
+            return this;
+        }
+
         public HttpServer build() {
             if (parser == null) {
                 parser = new BaseHttpRequestParser();
@@ -166,9 +179,34 @@ public class HttpServer {
 
             endpoints.forEach(endpoint -> log.info("Registering {}", endpoint));
 
-            return new HttpServer(parser, HttpHandler.of(handlers), writer, port, threadsNumber);
+            return new HttpServer(parser, HttpHandler.of(handlers), writer, port, threadsNumber, keepAliveTime);
         }
 
+    }
+
+    private static class DefaultThreadFactory implements ThreadFactory {
+        private static final AtomicInteger poolNumber = new AtomicInteger(1);
+        private final ThreadGroup group;
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+        private final String namePrefix;
+
+        DefaultThreadFactory(int port) {
+            SecurityManager s = System.getSecurityManager();
+            group = (s != null) ? s.getThreadGroup() :
+                    Thread.currentThread().getThreadGroup();
+            namePrefix = "http-" + port + "-exec-";
+        }
+
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(group, r,
+                    namePrefix + threadNumber.getAndIncrement(),
+                    0);
+            if (t.isDaemon())
+                t.setDaemon(false);
+            if (t.getPriority() != Thread.NORM_PRIORITY)
+                t.setPriority(Thread.NORM_PRIORITY);
+            return t;
+        }
     }
 
 }

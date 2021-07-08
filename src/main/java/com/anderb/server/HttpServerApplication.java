@@ -14,6 +14,7 @@ public class HttpServerApplication {
         HttpServer.create()
                 .port(propertyResolver.getInt("port", 8080))
                 .threadsNumber(propertyResolver.getInt("threadsNumber", 20))
+                .keepAliveTime(propertyResolver.getInt("keepAliveTime", 30000))
                 .endpoint(Endpoint
                         .create()
                         .method("GET")

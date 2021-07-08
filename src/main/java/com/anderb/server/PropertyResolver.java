@@ -14,6 +14,9 @@ import static java.util.stream.Collectors.toMap;
 public class PropertyResolver {
     private final Map<String, String> props = new HashMap<>();
 
+    public PropertyResolver() {
+    }
+
     public PropertyResolver(String [] properties) {
         parseProperties(properties);
     }
@@ -45,6 +48,10 @@ public class PropertyResolver {
     public long getLong(String key, long defaultValue) {
         String val = props.get(key);
         return val != null ? Long.parseLong(val) : defaultValue;
+    }
+
+    public void setProperty(String key, String value) {
+        props.put(key, value);
     }
 
     private Pair<String, String> parseProperty(String prop) {

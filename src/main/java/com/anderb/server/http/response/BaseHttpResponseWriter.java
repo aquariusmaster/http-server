@@ -45,7 +45,7 @@ public class BaseHttpResponseWriter implements HttpResponseWriter {
     }
 
     private void writeStatusLine(HttpStatus status, BufferedWriter out) throws IOException {
-        out.write("HTTP/1.0 " + status.getCode() + " " + status.getMessage() + END_LINE);
+        out.write("HTTP/1.1 " + status.getCode() + " " + status.getMessage() + END_LINE);
     }
 
     private void writeHeaders(HttpResponse response, BufferedWriter out) throws IOException {
