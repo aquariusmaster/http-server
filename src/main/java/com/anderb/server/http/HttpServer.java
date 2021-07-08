@@ -165,12 +165,7 @@ public class HttpServer {
             handlers.addLast(new NotFoundHttpHandler());
 
             endpoints.forEach(endpoint -> log.info("Registering {}", endpoint));
-            if (port == null) {
-                port = 8080;
-            }
-            if (threadsNumber == null) {
-                threadsNumber = 1;
-            }
+
             return new HttpServer(parser, HttpHandler.of(handlers), writer, port, threadsNumber);
         }
 
