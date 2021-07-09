@@ -13,3 +13,7 @@ Run server:
 1. Sun http server implementation: [sun/net/httpserver/ServerImpl.java:386](https://github.com/JetBrains/jdk8u_jdk/blob/master/src/share/classes/sun/net/httpserver/ServerImpl.java#L375)
 2. [Java NIO: Non-blocking Server](http://tutorials.jenkov.com/java-nio/non-blocking-server.html)
 3. [Java NIO ServerSocketChannel](http://tutorials.jenkov.com/java-nio/server-socket-channel.html)
+
+## Tips to know:
+1. Connection reuse only works since HTTP 1.1.
+2. 

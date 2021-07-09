@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.LinkedList;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -49,6 +48,7 @@ public class HttpServer {
                 .requestHandler(socket -> {
                     try {
                         socket.setKeepAlive(true);
+                        socket.setSoTimeout(1000 * 60 * 2);
 
                         //Parsing http request
                         HttpRequest request = requestParser.parseRequest(socket);
@@ -65,6 +65,7 @@ public class HttpServer {
                         responseWriter.writeResponse(socket, response);
 
                         if (ifNeedToClose(socket, request)) {
+                            log.debug("closing socket {}", socket);
                             IOHelper.closeQuietly(socket);
                         }
 
