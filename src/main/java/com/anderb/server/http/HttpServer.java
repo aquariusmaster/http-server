@@ -47,8 +47,7 @@ public class HttpServer {
                 .keepAliveTime(keepAliveTime)
                 .requestHandler(socket -> {
                     try {
-                        socket.setKeepAlive(true);
-                        socket.setSoTimeout(1000 * 60 * 2);
+                        socket.setSoTimeout(1000 * 60 * 5);
 
                         //Parsing http request
                         HttpRequest request = requestParser.parseRequest(socket);
@@ -106,9 +105,7 @@ public class HttpServer {
     }
 
     private boolean ifNeedToClose(Socket socket, HttpRequest request) throws SocketException {
-        return !socket.getKeepAlive() &&
-                request.getHeader("Connection") == null &&
-                !"keep-alive".equalsIgnoreCase(request.getHeader("Connection"));
+        return "close".equalsIgnoreCase(request.getHeader("Connection"));
     }
 
     public static HttpServerBuilder create() {

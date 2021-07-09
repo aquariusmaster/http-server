@@ -39,6 +39,7 @@ public class ConnectionHandler implements Runnable {
                 } else if (idleDeadline < System.currentTimeMillis()) {
                     log.debug("Closing idle socket");
                     socket.close();
+                    break;
                 }
                 Thread.sleep(10); //TODO probably must be a better way to wait for data from the socket
             } catch (Exception e) {
