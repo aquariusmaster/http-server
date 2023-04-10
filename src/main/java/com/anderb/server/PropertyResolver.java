@@ -14,9 +14,6 @@ import static java.util.stream.Collectors.toMap;
 public class PropertyResolver {
     private final Map<String, String> props = new HashMap<>();
 
-    public PropertyResolver() {
-    }
-
     public PropertyResolver(String [] properties) {
         parseProperties(properties);
     }
@@ -24,12 +21,8 @@ public class PropertyResolver {
     public void parseProperties(String[] values) {
         try {
             Map<String, String> newProperties = Arrays.stream(values)
-                    .collect(
-                            toMap(
-                                    p -> p.substring(2, p.indexOf("=")),
-                                    p -> p.substring(p.indexOf("=") + 1)
-                            )
-                    );
+                    .map(this::parseProperty)
+                    .collect(toMap(Pair::getLeft, Pair::getRight, (o, n) -> n));
             props.putAll(newProperties);
         } catch (Exception e) {
             log.error("Exception during parsing properties", e);
@@ -55,7 +48,11 @@ public class PropertyResolver {
     }
 
     private Pair<String, String> parseProperty(String prop) {
-        String key = prop.substring(2, prop.indexOf("=")); //skip first two chars (--)
+        int index = 0;
+        if (prop.startsWith("--")) {
+            index = 2;
+        }
+        String key = prop.substring(index, prop.indexOf("=")); //skip first two chars (--)
         String value = prop.substring(prop.indexOf("=") + 1);
         return new Pair<>(key, value);
     }

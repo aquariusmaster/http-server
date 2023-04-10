@@ -42,7 +42,7 @@ public class HttpServer {
     }
 
     private SocketTemplate buildHttpServer(int port, int threadsNumber, long keepAliveTime) {
-        return SocketTemplate.builder()
+        return SocketTemplate.create()
                 .port(port)
                 .keepAliveTime(keepAliveTime)
                 .requestHandler(socket -> {
@@ -121,9 +121,6 @@ public class HttpServer {
         private Integer threadsNumber;
         private Long keepAliveTime;
 
-        HttpServerBuilder() {
-        }
-
         public HttpServerBuilder requestParser(HttpRequestParser requestParser) {
             this.parser = requestParser;
             return this;
@@ -183,26 +180,24 @@ public class HttpServer {
     }
 
     private static class DefaultThreadFactory implements ThreadFactory {
-        private static final AtomicInteger poolNumber = new AtomicInteger(1);
         private final ThreadGroup group;
         private final AtomicInteger threadNumber = new AtomicInteger(1);
         private final String namePrefix;
 
         DefaultThreadFactory(int port) {
             SecurityManager s = System.getSecurityManager();
-            group = (s != null) ? s.getThreadGroup() :
-                    Thread.currentThread().getThreadGroup();
+            group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
             namePrefix = "http-" + port + "-exec-";
         }
 
         public Thread newThread(Runnable r) {
-            Thread t = new Thread(group, r,
-                    namePrefix + threadNumber.getAndIncrement(),
-                    0);
-            if (t.isDaemon())
+            Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
+            if (t.isDaemon()) {
                 t.setDaemon(false);
-            if (t.getPriority() != Thread.NORM_PRIORITY)
+            }
+            if (t.getPriority() != Thread.NORM_PRIORITY) {
                 t.setPriority(Thread.NORM_PRIORITY);
+            }
             return t;
         }
     }

@@ -1,10 +1,7 @@
 package com.anderb.server;
 
-
 import com.anderb.server.http.HttpServer;
 import com.anderb.server.http.handler.Endpoint;
-
-import java.util.Map;
 
 import static com.anderb.server.IOHelper.writeFileFromResource;
 

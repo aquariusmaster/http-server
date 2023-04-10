@@ -13,6 +13,9 @@ public class BaseHttpRequestParser implements HttpRequestParser {
 
     public HttpRequest parseRequest(Socket socket) {
         try {
+            if (!socket.isConnected() && socket.isClosed()) {
+                return null;
+            }
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             HttpRequest httpRequest = new HttpRequest();
             String firstLine = in.readLine();
