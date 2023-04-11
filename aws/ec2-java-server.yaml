@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template for EC2 instance running Java 11 and custom Java server app
+Description: CloudFormation template for EC2 instance running Java 17 and custom Java server app
 
 Parameters:
   KeyName:

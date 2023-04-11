@@ -5,7 +5,10 @@ import com.anderb.server.http.HttpStatus;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Date;
 import java.util.Objects;
@@ -18,7 +21,6 @@ public class BaseHttpResponseWriter implements HttpResponseWriter {
     public void writeResponse(Socket socket, HttpResponse response) {
         Objects.requireNonNull(socket, "Socket cannot be null!");
         Objects.requireNonNull(response, "response cannot be null!");
-
         try {
             OutputStream outputStream = socket.getOutputStream();
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outputStream));
