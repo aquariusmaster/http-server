@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for EC2 instance running Java 11 and custom Java server app
+
+Parameters:
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: 'AWS::EC2::KeyPair::KeyName'
+  JarUrl:
+    Description: url to get java jar file
+    Type: 'String'
+  JarParams:
+    Description: params to run java jar file
+    Type: 'String'
+
+Resources:
+  InstanceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable ports 80, 443, and 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '443'
+          ToPort: '443'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+
+  JavaServerInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: t4g.nano
+      KeyName: !Ref KeyName
+      ImageId: ami-0750be70a912aa1e9
+      SecurityGroupIds:
+        - !Ref InstanceSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          sudo yum update -y
+          sudo yum install -y java-17-amazon-corretto-headless.aarch64
+          java -version
+
+          wget ${JarUrl}
+          
+          java -jar *.jar ${JarParams}
+
+Outputs:
+  InstanceUrl:
+    Description: URL of the created EC2 instance
+    Value: !Sub "${JavaServerInstance.PublicDnsName}"
+    Export:
+      Name: InstanceUrl

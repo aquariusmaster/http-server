@@ -27,7 +27,7 @@ public class ConnectionHandler implements Runnable {
                 if (idleDeadline == -1) {
                     idleDeadline = System.nanoTime() / 1_000_000 + keepAliveTime;
                 } else if (idleDeadline < System.nanoTime()) {
-                    log.debug("Closing idle socket");
+                    log.debug("Closing idle connection");
                     socket.close();
                     break;
                 }
