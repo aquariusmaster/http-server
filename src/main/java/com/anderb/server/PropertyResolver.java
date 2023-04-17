@@ -7,8 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.stream.Collectors.toMap;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class PropertyResolver {
@@ -22,7 +21,7 @@ public class PropertyResolver {
         try {
             Map<String, String> newProperties = Arrays.stream(values)
                     .map(this::parseProperty)
-                    .collect(toMap(Pair::getLeft, Pair::getRight, (o, n) -> n));
+                    .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (o, n) -> n));
             props.putAll(newProperties);
         } catch (Exception e) {
             log.error("Exception during parsing properties", e);
