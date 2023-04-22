@@ -1,4 +1,4 @@
-package com.anderb.webserver.server;
+package com.anderb.server.http;
 
 public enum HttpStatus {
 
@@ -19,7 +19,7 @@ public enum HttpStatus {
         return code;
     }
 
-    public String getMsg() {
+    public String getMessage() {
         return msg;
     }
 }

@@ -1,4 +1,4 @@
-package com.anderb.webserver.server.request;
+package com.anderb.server.http.request;
 
 import java.net.Socket;
 

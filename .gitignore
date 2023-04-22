@@ -5,3 +5,5 @@
 build/
 out/
 logs/
+.DS_Store
+**/SunServer.java
