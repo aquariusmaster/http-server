@@ -51,6 +51,23 @@ HttpServer.create()
         .run();
 ```
 
+Upload to S3:
+```bash
+./gradlew upload -Pbucket=your-bucket
+```
+
+Deploy to CloudFormation:
+```bash
+aws cloudformation create-stack \
+  --stack-name <stack-name> \
+  --template-body file://aws/ec2-java-server.yaml \
+  --parameters \
+    ParameterKey=KeyName,ParameterValue=<key-name> \
+    ParameterKey=JarUrl,ParameterValue=<jar-url> \
+    ParameterKey=JarParams,ParameterValue=<jar-params> \
+  --capabilities CAPABILITY_NAMED_IAM
+```
+
 ## Useful links:
 1. Sun http server implementation: [sun/net/httpserver/ServerImpl.java:386](https://github.com/JetBrains/jdk8u_jdk/blob/master/src/share/classes/sun/net/httpserver/ServerImpl.java#L375)
 2. [Java NIO: Non-blocking Server](http://tutorials.jenkov.com/java-nio/non-blocking-server.html)

@@ -1,10 +1,10 @@
 package com.anderb.server.http.handler;
 
+import com.anderb.server.http.request.HttpRequest;
+import com.anderb.server.http.response.HttpResponse;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import com.anderb.server.http.response.HttpResponse;
-import com.anderb.server.http.request.HttpRequest;
 
 import java.io.IOException;
 import java.util.function.BiConsumer;

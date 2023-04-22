@@ -1,14 +1,15 @@
 package com.anderb.server;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.Socket;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 
 import static com.anderb.server.Handler.Status.IDLE;
 
 @Slf4j
+@RequiredArgsConstructor
 public class ConnectionHandler implements Runnable {
 
     private final Socket socket;
@@ -17,17 +18,6 @@ public class ConnectionHandler implements Runnable {
     private final long keepAliveTime;
     private long idleDeadline = -1;
 
-    public ConnectionHandler(Socket socket, Handler requestHandler, BiConsumer<Exception, Socket> errorHandler, long keepAliveTime) {
-        Objects.requireNonNull(socket);
-        Objects.requireNonNull(requestHandler);
-        Objects.requireNonNull(errorHandler);
-
-        this.socket = socket;
-        this.requestHandler = requestHandler;
-        this.errorHandler = errorHandler;
-        this.keepAliveTime = keepAliveTime;
-    }
-
     @Override
     public void run() {
         while (!socket.isClosed()) {
@@ -35,9 +25,9 @@ public class ConnectionHandler implements Runnable {
                 Handler.Status status = requestHandler.handle(socket);
                 if (status != IDLE) continue;
                 if (idleDeadline == -1) {
-                    idleDeadline = System.currentTimeMillis() + keepAliveTime;
-                } else if (idleDeadline < System.currentTimeMillis()) {
-                    log.debug("Closing idle socket");
+                    idleDeadline = System.nanoTime() / 1_000_000 + keepAliveTime;
+                } else if (idleDeadline < System.nanoTime()) {
+                    log.debug("Closing idle connection");
                     socket.close();
                     break;
                 }
