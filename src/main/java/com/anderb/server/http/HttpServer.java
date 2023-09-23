@@ -3,7 +3,10 @@ package com.anderb.server.http;
 import com.anderb.server.Handler;
 import com.anderb.server.IOHelper;
 import com.anderb.server.SocketTemplate;
-import com.anderb.server.http.handler.*;
+import com.anderb.server.http.handler.Endpoint;
+import com.anderb.server.http.handler.HttpHandleException;
+import com.anderb.server.http.handler.HttpHandler;
+import com.anderb.server.http.handler.NotFoundHttpHandler;
 import com.anderb.server.http.request.BaseHttpRequestParser;
 import com.anderb.server.http.request.HttpRequest;
 import com.anderb.server.http.request.HttpRequestParseException;
@@ -20,7 +23,6 @@ import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class HttpServer {
@@ -86,14 +88,14 @@ public class HttpServer {
                     if (!socket.isClosed()) {
                         responseWriter.writeResponse(socket, HttpResponse.serverError(e.getMessage()));
                     }
-                }
-                )
+                })
                 .pool(createPool(threadsNumber, port))
                 .build();
     }
 
     private ExecutorService createPool(int threadsNumber, int port) {
-        return Executors.newFixedThreadPool(threadsNumber, new DefaultThreadFactory(port));
+        ThreadFactory factory = Thread.ofPlatform().daemon().name("http-" + port + "-exec-", 0).factory();
+        return Executors.newFixedThreadPool(threadsNumber, factory);
     }
 
     public void run() {
@@ -180,31 +182,6 @@ public class HttpServer {
             return new HttpServer(parser, HttpHandler.of(handlers), writer, port, threadsNumber, keepAliveTime);
         }
 
-    }
-
-    private static class DefaultThreadFactory implements ThreadFactory {
-        private static final AtomicInteger poolNumber = new AtomicInteger(1);
-        private final ThreadGroup group;
-        private final AtomicInteger threadNumber = new AtomicInteger(1);
-        private final String namePrefix;
-
-        DefaultThreadFactory(int port) {
-            SecurityManager s = System.getSecurityManager();
-            group = (s != null) ? s.getThreadGroup() :
-                    Thread.currentThread().getThreadGroup();
-            namePrefix = "http-" + port + "-exec-";
-        }
-
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(group, r,
-                    namePrefix + threadNumber.getAndIncrement(),
-                    0);
-            if (t.isDaemon())
-                t.setDaemon(false);
-            if (t.getPriority() != Thread.NORM_PRIORITY)
-                t.setPriority(Thread.NORM_PRIORITY);
-            return t;
-        }
     }
 
 }

@@ -19,7 +19,11 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 group 'com.anderb'
 version '0.0.1-SNAPSHOT'
-sourceCompatibility = 11
+
+java {
+    sourceCompatibility = '21'
+    toolchain { languageVersion = JavaLanguageVersion.of(21)}
+}
 
 repositories {
     mavenCentral()
@@ -60,3 +64,4 @@ test {
 task serve(type: Exec, dependsOn: build) {
     commandLine 'java', '-jar', 'build/libs/http-server.jar'
 }
+targetCompatibility = JavaVersion.VERSION_19
